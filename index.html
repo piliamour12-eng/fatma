@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Civics Syllabus Explorer | Interactive Civic Education</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #eef2f7 0%, #d9e1ec 100%);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 2rem 1.5rem;
+            color: #1a2c3e;
+        }
+
+        /* main app container */
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(2px);
+            border-radius: 2.5rem;
+            box-shadow: 0 25px 45px -12px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        /* header area with flag motifs */
+        .hero {
+            background: #0b2b3b;
+            background-image: radial-gradient(circle at 10% 20%, rgba(255,215,0,0.08) 2%, transparent 2.5%);
+            background-size: 28px 28px;
+            padding: 2rem 2rem 1.8rem 2rem;
+            color: white;
+            border-bottom: 4px solid #e0b23c;
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .hero h1 span {
+            background: #e0b23c;
+            padding: 0.2rem 0.8rem;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #0b2b3b;
+            letter-spacing: 0;
+        }
+
+        .hero p {
+            margin-top: 0.7rem;
+            font-size: 1.05rem;
+            opacity: 0.85;
+            max-width: 75%;
+        }
+
+        /* stats + quick info bar */
+        .quick-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            background: #ffffffcc;
+            backdrop-filter: blur(8px);
+            padding: 0.9rem 2rem;
+            border-bottom: 1px solid #cbd5e1;
+            font-weight: 500;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            gap: 12px;
+            align-items: baseline;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            background: #1e4a6b;
+            color: white;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .filter-info {
+            font-size: 0.85rem;
+            color: #2c3e4e;
+        }
+
+        /* main layout -> sidebar + content */
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* sidebar (topics & filters) */
+        .sidebar {
+            background: #f8fafc;
+            width: 280px;
+            flex-shrink: 0;
+            border-right: 1px solid #e2e8f0;
+            padding: 1.8rem 1.2rem;
+        }
+
+        .sidebar h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #0f3b4f;
+            border-left: 4px solid #e0b23c;
+            padding-left: 0.7rem;
+        }
+
+        .topic-filter-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .topic-filter-list li {
+            margin-bottom: 0.6rem;
+        }
+
+        .filter-btn {
+            width: 100%;
+            text-align: left;
+            background: transparent;
+            border: none;
+            padding: 0.55rem 0.8rem;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #2d4a66;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-btn:hover {
+            background: #e2edf7;
+            color: #0b2b3b;
+        }
+
+        .filter-btn.active {
+            background: #0b2b3b;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .progress-section {
+            margin-top: 2rem;
+            border-top: 1px dashed #cbd5e1;
+            padding-top: 1.5rem;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.6rem;
+        }
+
+        .progress-bar-bg {
+            background: #d9e2ec;
+            border-radius: 30px;
+            height: 8px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .progress-fill {
+            background: #e0b23c;
+            width: 0%;
+            height: 100%;
+            border-radius: 30px;
+            transition: width 0.3s ease;
+        }
+
+        .reset-btn {
+            margin-top: 1rem;
+            background: #edf2f7;
+            border: 1px solid #cbd5e1;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            text-align: center;
+        }
+
+        .reset-btn:hover {
+            background: #e0b23c20;
+            border-color: #e0b23c;
+        }
+
+        /* main syllabus content area */
+        .syllabus-content {
+            flex: 1;
+            padding: 1.8rem 2rem;
+            background: white;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 1.8rem;
+            border-bottom: 2px solid #eef2f8;
+            padding-bottom: 0.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #1e4a6b;
+        }
+
+        .unit-counter {
+            font-size: 0.85rem;
+            background: #eef2ff;
+            padding: 0.2rem 0.7rem;
+            border-radius: 40px;
+        }
+
+        /* card based syllabus units */
+        .units-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .unit-card {
+            background: #ffffff;
+            border-radius: 1.2rem;
+            border: 1px solid #e4edf5;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .unit-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 24px -8px rgba(0, 0, 0, 0.12);
+            border-color: #cbdde9;
+        }
+
+        .card-header {
+            background: #fbfefc;
+            padding: 1rem 1.2rem 0.6rem 1.2rem;
+            border-bottom: 1px solid #eef2f6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .topic-badge {
+            background: #e2dccd;
+            color: #5a4200;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .check-indicator {
+            font-size: 1.3rem;
+            color: #a0c0d0;
+            transition: color 0.1s;
+        }
+
+        .unit-card.completed .check-indicator {
+            color: #e0b23c;
+        }
+
+        .unit-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0.8rem 1.2rem 0.4rem 1.2rem;
+            color: #1f3b4a;
+        }
+
+        .unit-description {
+            font-size: 0.85rem;
+            color: #3e5a6b;
+            margin: 0 1.2rem 1rem 1.2rem;
+            line-height: 1.4;
+        }
+
+        .topics-list {
+            padding: 0 1.2rem 1rem 1.2rem;
+            border-top: 1px solid #f0f4f9;
+            margin-top: 0.3rem;
+        }
+
+        .topics-list p {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #7e95a8;
+            margin: 0.7rem 0 0.3rem 0;
+        }
+
+        .topic-chip {
+            display: inline-block;
+            background: #edf3f8;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            margin: 0.2rem 0.3rem 0.2rem 0;
+            color: #1e4a6b;
+        }
+
+        .complete-btn {
+            margin: 0.2rem 1.2rem 1.2rem 1.2rem;
+            background: #f1f5f9;
+            border: none;
+            padding: 0.45rem;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #2c5368;
+        }
+
+        .complete-btn:hover {
+            background: #e0b23c20;
+            color: #0f2f40;
+        }
+
+        .unit-card.completed .complete-btn {
+            background: #e0b23c30;
+            border: 1px solid #e0b23c70;
+        }
+
+        /* empty / no results */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: #fafdff;
+            border-radius: 2rem;
+            color: #5d7f94;
+        }
+
+        /* Responsive */
+        @media (max-width: 780px) {
+            body {
+                padding: 1rem;
+            }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            .hero p {
+                max-width: 100%;
+            }
+            .dashboard {
+                flex-direction: column;
+            }
+            .units-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        footer {
+            background: #f1f5f9;
+            padding: 1rem 2rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #4b6b82;
+            border-top: 1px solid #e2edf2;
+        }
+        button {
+            font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="hero">
+        <h1>
+            📚 Civic Mirror · Syllabus Explorer
+            <span>Grades 9–12</span>
+        </h1>
+        <p>Explore fundamental civics topics — from constitutional foundations to modern civic engagement. Track your progress, filter by theme, and master the pillars of democracy.</p>
+    </div>
+    <div class="quick-stats">
+        <div class="stat-item">
+            <span class="stat-badge">📖 Total Units</span>
+            <strong id="total-units-count">0</strong>
+        </div>
+        <div class="stat-item">
+            <span class="stat-badge">✅ Completed</span>
+            <strong id="completed-count">0</strong>
+        </div>
+        <div class="filter-info" id="active-filter-label">🏛️ All topics</div>
+    </div>
+    <div class="dashboard">
+        <div class="sidebar">
+            <h3>🗂️ Filter by theme</h3>
+            <ul class="topic-filter-list" id="filter-list">
+                <!-- filters injected dynamically -->
+            </ul>
+            <div class="progress-section">
+                <div class="progress-text">📈 Your civics journey</div>
+                <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+                <div style="margin-top: 8px; font-size: 0.75rem;" id="progress-percent">0% complete</div>
+                <button class="reset-btn" id="reset-progress-btn">⟳ Reset all progress</button>
+            </div>
+        </div>
+        <div class="syllabus-content">
+            <div class="section-header">
+                <h2>📌 Syllabus units</h2>
+                <div class="unit-counter" id="showing-counter">showing X of Y</div>
+            </div>
+            <div id="units-container" class="units-grid">
+                <!-- dynamic units cards -->
+            </div>
+        </div>
+    </div>
+    <footer>
+        🇺🇸 Informed citizens shape strong democracies — based on standard civics & government frameworks.
+    </footer>
+</div>
+
+<script>
+    // ----- CIVICS SYLLABUS DATA (rich content with themes & topics) -----
+    const syllabusUnits = [
+        {
+            id: 1,
+            title: "Foundations of American Government",
+            description: "Explore the philosophical roots, the Declaration of Independence, and the creation of the Constitution.",
+            theme: "foundations",
+            topics: ["Social Contract", "Popular Sovereignty", "Limited Government", "Separation of Powers"],
+            completed: false
+        },
+        {
+            id: 2,
+            title: "The Constitution & Federalism",
+            description: "Structure of the Constitution, Federalism, delegated/reserved/concurrent powers, and landmark clauses.",
+            theme: "constitution",
+            topics: ["Article I-VII", "Supremacy Clause", "Commerce Clause", "Tenth Amendment"],
+            completed: false
+        },
+        {
+            id: 3,
+            title: "Branches of Government: Legislative",
+            description: "Congress, lawmaking process, committees, oversight, and powers of the House & Senate.",
+            theme: "branches",
+            topics: ["Bicameralism", "Implied Powers", "Filibuster", "Legislative Process"],
+            completed: false
+        },
+        {
+            id: 4,
+            title: "Executive Branch & Presidency",
+            description: "Roles, powers, executive orders, cabinet, and the modern bureaucracy.",
+            theme: "branches",
+            topics: ["Commander-in-Chief", "Executive Orders", "Appointments", "Veto Power"],
+            completed: false
+        },
+        {
+            id: 5,
+            title: "Judicial Branch & Civil Rights",
+            description: "Federal court system, judicial review, landmark Supreme Court cases, and civil liberties.",
+            theme: "rights",
+            topics: ["Marbury v. Madison", "Judicial Review", "Brown v. Board", "Due Process"],
+            completed: false
+        },
+        {
+            id: 6,
+            title: "Bill of Rights & Liberties",
+            description: "First Amendment freedoms, right to bear arms, rights of accused, and evolving interpretation.",
+            theme: "rights",
+            topics: ["Freedom of Speech", "Right to Privacy", "Miranda Rights", "Equal Protection"],
+            completed: false
+        },
+        {
+            id: 7,
+            title: "Political Parties & Elections",
+            description: "Role of parties, electoral process, campaign finance, and voting behavior.",
+            theme: "participation",
+            topics: ["Two-party system", "Primaries & Caucuses", "Electoral College", "PACs & Super PACs"],
+            completed: false
+        },
+        {
+            id: 8,
+            title: "Media, Public Opinion & Civic Participation",
+            description: "How media shapes democracy, polling, interest groups, and active citizenship.",
+            theme: "participation",
+            topics: ["Media Bias", "Public Opinion Polls", "Lobbying", "Protest & Petition"],
+            completed: false
+        },
+        {
+            id: 9,
+            title: "State & Local Government",
+            description: "Structure of state governments, local ordinances, and the role of municipalities.",
+            theme: "local",
+            topics: ["Governors & Legislatures", "County Commissions", "Home Rule", "Zoning Laws"],
+            completed: false
+        },
+        {
+            id: 10,
+            title: "Comparative Government & Global Civics",
+            description: "Compare democratic systems, international organizations, and global human rights.",
+            theme: "global",
+            topics: ["Parliamentary vs Presidential", "UN & NATO", "Human Rights Treaties", "Global Citizenship"],
+            completed: false
+        }
+    ];
+
+    // helper: get unique themes from data for filters
+    function extractThemes() {
+        const themesSet = new Set();
+        syllabusUnits.forEach(unit => { if(unit.theme) themesSet.add(unit.theme); });
+        return Array.from(themesSet);
+    }
+
+    // load progress from localStorage
+    function loadProgress() {
+        const saved = localStorage.getItem("civics_syllabus_progress");
+        if (saved) {
+            try {
+                const completedIds = JSON.parse(saved);
+                syllabusUnits.forEach(unit => {
+                    unit.completed = completedIds.includes(unit.id);
+                });
+            } catch(e) {}
+        }
+    }
+
+    // save progress to localStorage
+    function persistProgress() {
+        const completedIds = syllabusUnits.filter(u => u.completed).map(u => u.id);
+        localStorage.setItem("civics_syllabus_progress", JSON.stringify(completedIds));
+    }
+    
+    // reset all progress
+    function resetAllProgress() {
+        syllabusUnits.forEach(unit => unit.completed = false);
+        persistProgress();
+        activeFilter = "all";
+        renderFilters();
+        renderUnits();
+        updateStatsAndProgress();
+    }
+    
+    // toggle unit completion
+    function toggleUnitCompletion(unitId) {
+        const unit = syllabusUnits.find(u => u.id === unitId);
+        if (unit) {
+            unit.completed = !unit.completed;
+            persistProgress();
+            updateStatsAndProgress();
+            renderUnits();  // re-render to update checkmarks & styles
+            renderFilters(); // just to keep any active filter highlight but not necessary
+        }
+    }
+
+    // global active filter, default all
+    let activeFilter = "all";
+    
+    // get filtered units based on active theme
+    function getFilteredUnits() {
+        if (activeFilter === "all") return [...syllabusUnits];
+        return syllabusUnits.filter(unit => unit.theme === activeFilter);
+    }
+    
+    // update stats (total/completed) and progress bar
+    function updateStatsAndProgress() {
+        const total = syllabusUnits.length;
+        const completedCount = syllabusUnits.filter(u => u.completed).length;
+        document.getElementById("total-units-count").innerText = total;
+        document.getElementById("completed-count").innerText = completedCount;
+        const percent = total === 0 ? 0 : (completedCount / total) * 100;
+        const progressFill = document.getElementById("progress-fill");
+        if (progressFill) progressFill.style.width = `${percent}%`;
+        document.getElementById("progress-percent").innerText = `${Math.round(percent)}% complete`;
+        
+        // also update showing counter
+        const filtered = getFilteredUnits();
+        const showingCount = filtered.length;
+        document.getElementById("showing-counter").innerText = `showing ${showingCount} of ${total}`;
+        let filterLabel = "🏛️ All topics";
+        if (activeFilter !== "all") {
+            const themeMap = {
+                foundations: "🏛️ Foundations",
+                constitution: "📜 Constitution",
+                branches: "⚖️ Branches of Govt",
+                rights: "🕊️ Rights & Liberties",
+                participation: "🗳️ Participation",
+                local: "🏘️ Local Gov",
+                global: "🌍 Global Civics"
+            };
+            filterLabel = themeMap[activeFilter] || activeFilter;
+        }
+        document.getElementById("active-filter-label").innerHTML = filterLabel;
+    }
+    
+    // render filter buttons
+    function renderFilters() {
+        const themes = extractThemes();
+        const filterContainer = document.getElementById("filter-list");
+        if (!filterContainer) return;
+        let html = `<li><button class="filter-btn ${activeFilter === 'all' ? 'active' : ''}" data-filter="all">✨ All Units</button></li>`;
+        themes.forEach(theme => {
+            let displayName = theme;
+            const themeLabels = {
+                foundations: "🏛️ Foundations",
+                constitution: "📜 Constitution & Federalism",
+                branches: "⚖️ Branches of Power",
+                rights: "🕊️ Rights & Justice",
+                participation: "🗳️ Participation & Media",
+                local: "🏘️ State & Local",
+                global: "🌍 Comparative & Global"
+            };
+            displayName = themeLabels[theme] || theme.charAt(0).toUpperCase() + theme.slice(1);
+            html += `<li><button class="filter-btn ${activeFilter === theme ? 'active' : ''}" data-filter="${theme}">${displayName}</button></li>`;
+        });
+        filterContainer.innerHTML = html;
+        // attach event listeners to filters
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const filterVal = btn.getAttribute('data-filter');
+                activeFilter = filterVal;
+                renderFilters();    // re-render to show active style
+                renderUnits();
+                updateStatsAndProgress();
+            });
+        });
+    }
+    
+    // render syllabus units as cards
+    function renderUnits() {
+        const filtered = getFilteredUnits();
+        const container = document.getElementById("units-container");
+        if (!container) return;
+        if (filtered.length === 0) {
+            container.innerHTML = `<div class="empty-state"><span>🧭 No units match this theme. Try another filter!</span></div>`;
+            return;
+        }
+        let cardsHtml = "";
+        filtered.forEach(unit => {
+            const isCompleted = unit.completed;
+            const completedClass = isCompleted ? "completed" : "";
+            // theme badge for card
+            let themeNice = "";
+            switch(unit.theme) {
+                case "foundations": themeNice = "🏛️ Foundations"; break;
+                case "constitution": themeNice = "📜 Constitution"; break;
+                case "branches": themeNice = "⚖️ Branches"; break;
+                case "rights": themeNice = "🕊️ Rights"; break;
+                case "participation": themeNice = "🗳️ Participation"; break;
+                case "local": themeNice = "🏘️ Local Gov"; break;
+                case "global": themeNice = "🌍 Global"; break;
+                default: themeNice = unit.theme;
+            }
+            cardsHtml += `
+                <div class="unit-card ${completedClass}" data-id="${unit.id}">
+                    <div class="card-header">
+                        <span class="topic-badge">${themeNice}</span>
+                        <span class="check-indicator">${isCompleted ? '✅' : '◻️'}</span>
+                    </div>
+                    <div class="unit-title">${escapeHtml(unit.title)}</div>
+                    <div class="unit-description">${escapeHtml(unit.description)}</div>
+                    <div class="topics-list">
+                        <p>🔍 core topics</p>
+                        ${unit.topics.map(t => `<span class="topic-chip">${escapeHtml(t)}</span>`).join('')}
+                    </div>
+                    <button class="complete-btn" data-id="${unit.id}">
+                        ${isCompleted ? '✔️ Mark as incomplete' : '📘 Mark as completed'}
+                    </button>
+                </div>
+            `;
+        });
+        container.innerHTML = cardsHtml;
+        // attach event listeners to complete buttons
+        document.querySelectorAll('.complete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idAttr = btn.getAttribute('data-id');
+                if (idAttr) toggleUnitCompletion(parseInt(idAttr));
+            });
+        });
+        // optional: whole card click (but we keep button separate, no conflict)
+        document.querySelectorAll('.unit-card').forEach(card => {
+            const btnInside = card.querySelector('.complete-btn');
+            // optional double click? but avoid interference
+            card.addEventListener('click', (e) => {
+                if (e.target === btnInside || btnInside?.contains(e.target)) return;
+                // intentionally do nothing to avoid confusion - just design
+            });
+        });
+    }
+    
+    // simple escape to avoid injection
+    function escapeHtml(str) {
+        if (!str) return "";
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+    
+    // initialize app
+    function init() {
+        loadProgress();
+        renderFilters();
+        renderUnits();
+        updateStatsAndProgress();
+        // reset button listener
+        const resetBtn = document.getElementById("reset-progress-btn");
+        if (resetBtn) {
+            resetBtn.addEventListener("click", () => {
+                if (confirm("Reset all unit progress? This will uncheck every completed unit.")) {
+                    resetAllProgress();
+                    renderUnits();
+                    updateStatsAndProgress();
+                }
+            });
+        }
+    }
+    
+    init();
+</script>
+</body>
+</html>
